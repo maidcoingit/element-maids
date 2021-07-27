@@ -41,6 +41,16 @@ contract ElementMaids is Ownable, IElementMaids {
         }
     }
 
+    mapping (address => mapping (ElementKind => bool)) private checkMyMaid;
+
+    function setMaidChecking(ElementKind[] memory kinds, bool[] memory settings) external {
+        require(kinds.length == settings.length);
+        uint256 length = kinds.length;
+        for (uint256 i = 0; i < length; i += 1) {
+            checkMyMaid[msg.sender][kinds[i]] = settings[i];
+        }
+    }
+
     struct Army {
         ElementKind kind;
         uint8 unitCount;
@@ -231,12 +241,14 @@ contract ElementMaids is Ownable, IElementMaids {
     function calculateDamage(Army memory from, Army memory to) internal view returns (uint8) {
         uint16 damage = from.unitCount;
 
-        uint256[] memory maids = elementMaids[from.kind];
-        uint256 maidsLength = maids.length;
-        for (uint256 i = 0; i < maidsLength; i += 1) {
-            if (maid.ownerOf(maids[i]) == msg.sender) {
-                damage = (damage * 125) / 100; // *1.25
-                break;
+        if (checkMyMaid[from.owner][from.kind]) {
+            uint256[] memory maids = elementMaids[from.kind];
+            uint256 maidsLength = maids.length;
+            for (uint256 i = 0; i < maidsLength; i += 1) {
+                if (maid.ownerOf(maids[i]) == from.owner) {
+                    damage = (damage * 125) / 100; // *1.25
+                    break;
+                }
             }
         }
 
