@@ -221,7 +221,7 @@ contract ElementMaids is Ownable, IElementMaids {
         useEnergy(season, unitCount);
 
         map[y][x].unitCount = newUnitCount;
-
+        map[y][x].blockNumber = block.number;
         emit AppendUnits(msg.sender, x, y, unitCount);
     }
 
@@ -334,6 +334,7 @@ contract ElementMaids is Ownable, IElementMaids {
         // move.
         if (to.owner == address(0)) {
             map[toY][toX] = from;
+            to.blockNumber = block.number;
             delete map[fromY][fromX];
         }
         // combine.
@@ -344,7 +345,7 @@ contract ElementMaids is Ownable, IElementMaids {
             require(newUnitCount <= MAX_UNIT_COUNT, "Exceeds max unit counts per space");
 
             to.unitCount = newUnitCount;
-
+            to.blockNumber = block.number;
             playerInfo[season][msg.sender].occupyCounts -= 1;
             delete map[fromY][fromX];
         }
@@ -370,6 +371,7 @@ contract ElementMaids is Ownable, IElementMaids {
             // occupy.
             if (from.owner == msg.sender && to.owner == address(0)) {
                 map[toY][toX] = from;
+                to.blockNumber = block.number;
                 delete map[fromY][fromX];
             }
         }
