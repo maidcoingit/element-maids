@@ -63,12 +63,16 @@ contract ElementMaids is Ownable, IElementMaids {
         uint256 lastEnterBlock;
     }
 
+    struct SupporterInfo {
+        mapping(address => uint256) energySupported;
+        bool supporterWithdrawns;
+    }
+
     uint256 public season = 0;
     mapping(uint256 => uint256) public rewards;
     mapping(uint256 => WinnerInfo) public winnerInfo;
     mapping(uint256 => mapping(address => PlayerInfo)) public playerInfo;
-    mapping(uint256 => mapping(address => bool)) public supporterWithdrawns;
-    mapping(uint256 => mapping(address => mapping(address => uint256))) public energySupported;
+    mapping(uint256 => mapping(address => SupporterInfo)) public supporterInfo;
     mapping(uint256 => uint8) public enterCountsPerBlock;
 
     function buyEnergy(uint256 coinAmount) public override {
@@ -372,7 +376,7 @@ contract ElementMaids is Ownable, IElementMaids {
         energies[msg.sender] -= quantity;
         energies[to] += quantity;
         _playerInfo.energyTaken += quantity;
-        energySupported[season][msg.sender][to] += quantity;
+        supporterInfo[season][msg.sender].energySupported[to] += quantity;
         emit UseEnergy(msg.sender, quantity);
         emit Support(msg.sender, to, quantity);
     }
@@ -392,12 +396,13 @@ contract ElementMaids is Ownable, IElementMaids {
 
     function supporterWithdraw(uint256 targetSeason) external override {
         require(targetSeason < season);
-        require(!supporterWithdrawns[targetSeason][msg.sender]);
-        supporterWithdrawns[targetSeason][msg.sender] = true;
+        SupporterInfo storage sInfo = supporterInfo[targetSeason][msg.sender];
+        require(!sInfo.supporterWithdrawns);
+        sInfo.supporterWithdrawns = true;
 
         WinnerInfo storage _winnerInfo = winnerInfo[targetSeason];
         uint256 supporterReward = ((rewards[targetSeason] - _winnerInfo.winnerReward) *
-            energySupported[targetSeason][msg.sender][_winnerInfo.winner]) / _winnerInfo.winnerEnergyTaken;
+            sInfo.energySupported[_winnerInfo.winner]) / _winnerInfo.winnerEnergyTaken;
 
         maidCoin.transfer(msg.sender, supporterReward);
     }
