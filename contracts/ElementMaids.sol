@@ -420,6 +420,6 @@ contract ElementMaids is Ownable, IElementMaids {
         uint256 supporterReward = ((rewards[targetSeason] - _winnerInfo.winnerReward) *
             sInfo.energySupported[_winnerInfo.winner]) / _winnerInfo.winnerEnergyTaken;
 
-        maidCoin.transfer(msg.sender, supporterReward);
+        if (supporterReward > 0) maidCoin.transfer(msg.sender, supporterReward);
     }
 }
