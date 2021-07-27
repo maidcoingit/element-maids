@@ -41,7 +41,7 @@ contract ElementMaids is Ownable, IElementMaids {
         }
     }
 
-    mapping (address => mapping (ElementKind => bool)) private checkMyMaid;
+    mapping(address => mapping(ElementKind => bool)) private checkMyMaid;
 
     function setMaidChecking(ElementKind[] memory kinds, bool[] memory settings) external {
         require(kinds.length == settings.length);
@@ -390,8 +390,7 @@ contract ElementMaids is Ownable, IElementMaids {
         require(quantity > 0, "Must support more than zero");
         PlayerInfo storage _playerInfo = playerInfo[season][to];
         require(_playerInfo.occupyCounts <= (MAP_W * MAP_H) / 2, "The player is occupying more than 50% of map");
-        // require(_playerInfo.lastEnterBlock != 0);
-        // require(to != address(0));
+        require(_playerInfo.lastEnterBlock != 0, "Only support to a player");
         if (coinAmount > 0) buyEnergy(coinAmount);
 
         energies[msg.sender] -= quantity;
