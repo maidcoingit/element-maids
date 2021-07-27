@@ -1,1 +1,2 @@
-# element-maids-v2
+# element-maids
+Online Strategy Game with Maids on Polygon Network
