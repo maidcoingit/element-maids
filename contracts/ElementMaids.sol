@@ -126,6 +126,7 @@ contract ElementMaids is Ownable, IElementMaids {
         require(msg.sender == tx.origin, "Must be EOA");
         require(map[y][x].owner == address(0), "This space is not empty");
         require(unitCount <= MAX_UNIT_COUNT, "Exceeds max unit counts per space");
+        require(unitCount > 0, "Must create more than zero");
 
         uint256 _season = season;
         PlayerInfo storage _playerInfo = playerInfo[_season][msg.sender];
@@ -213,6 +214,7 @@ contract ElementMaids is Ownable, IElementMaids {
         uint256 coinAmount
     ) public override {
         require(map[y][x].owner == msg.sender, "Only append to your army");
+        require(unitCount > 0, "Must append more than zero");
 
         uint8 newUnitCount = map[y][x].unitCount + unitCount;
         require(newUnitCount <= MAX_UNIT_COUNT, "Exceeds max unit counts per space");
@@ -385,8 +387,11 @@ contract ElementMaids is Ownable, IElementMaids {
         uint256 coinAmount
     ) public override {
         require(msg.sender == tx.origin, "Must be EOA");
+        require(quantity > 0, "Must support more than zero");
         PlayerInfo storage _playerInfo = playerInfo[season][to];
         require(_playerInfo.occupyCounts <= (MAP_W * MAP_H) / 2, "The player is occupying more than 50% of map");
+        // require(_playerInfo.lastEnterBlock != 0);
+        // require(to != address(0));
         if (coinAmount > 0) buyEnergy(coinAmount);
 
         energies[msg.sender] -= quantity;
