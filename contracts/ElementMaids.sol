@@ -87,7 +87,7 @@ contract ElementMaids is Ownable, IElementMaids {
 
     function buyEnergy(uint256 coinAmount) public override {
         uint256 quantity = coinAmount / ENERGY_PRICE;
-        require(quantity > 0, "Only buy more than zero amount");
+        require(quantity > 0, "Must buy more than zero");
         maidCoin.transferFrom(msg.sender, address(this), coinAmount);
 
         energies[msg.sender] += quantity;
@@ -170,7 +170,7 @@ contract ElementMaids is Ownable, IElementMaids {
 
                 uint256 winnerReward;
 
-                //Guarantee a winner 30% of rewards.
+                //Guarantee a winner 30% of rewards at least.
                 if (7 * _energyUsed < 3 * _energyTaken) winnerReward = (rewards[_season] * 3) / 10;
                 else winnerReward = (rewards[_season] * _energyUsed) / (_energyUsed + _energyTaken);
 
@@ -328,7 +328,7 @@ contract ElementMaids is Ownable, IElementMaids {
         Army storage from = map[fromY][fromX];
         Army storage to = map[toY][toX];
 
-        require(from.owner == msg.sender);
+        require(from.owner == msg.sender, "Only control your army");
         require(from.blockNumber < block.number, "Wait until next block to attack");
 
         // move.
@@ -386,7 +386,7 @@ contract ElementMaids is Ownable, IElementMaids {
     ) public override {
         require(msg.sender == tx.origin, "Must be EOA");
         PlayerInfo storage _playerInfo = playerInfo[season][to];
-        require(_playerInfo.occupyCounts <= (MAP_W * MAP_H) / 2, "The player occupies over 50% of map");
+        require(_playerInfo.occupyCounts <= (MAP_W * MAP_H) / 2, "The player is occupying more than 50% of map");
         if (coinAmount > 0) buyEnergy(coinAmount);
 
         energies[msg.sender] -= quantity;
@@ -411,7 +411,7 @@ contract ElementMaids is Ownable, IElementMaids {
     }
 
     function supporterWithdraw(uint256 targetSeason) external override {
-        require(targetSeason < season);
+        require(targetSeason < season, "Target season has not ended yet");
         SupporterInfo storage sInfo = supporterInfo[targetSeason][msg.sender];
         require(!sInfo.supporterWithdrawns);
         sInfo.supporterWithdrawns = true;
